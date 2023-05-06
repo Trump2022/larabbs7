@@ -15,11 +15,24 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
+
+        // 修正代理服务器后的服务器参数
         \App\Http\Middleware\TrustProxies::class,
+
+        // 解决 cors 跨域问题
         \Illuminate\Http\Middleware\HandleCors::class,
+
+        // 检测应用是否进入『维护模式』
+        // 见：https://learnku.com/docs/laravel/9.x/configuration#maintenance-mode
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
+
+        // 检测表单请求的数据是否过大
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+
+        // 对所有提交的请求数据进行 PHP 函数 `trim()` 处理
         \App\Http\Middleware\TrimStrings::class,
+
+        // 将提交请求参数中空子串转换为 null
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
@@ -30,13 +43,21 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
-            \App\Http\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\EncryptCookies::class,// Cookie 加密解密
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,// 将 Cookie 添加到响应中
+            \Illuminate\Session\Middleware\StartSession::class, // 开启会话
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class, // 将系统的错误数据注入到视图变量 $errors 中
+            \App\Http\Middleware\VerifyCsrfToken::class,// 检验 CSRF ，防止跨站请求伪造的安全威胁 见：https://learnku.com/docs/laravel/9.x/csrf
+
+            // 处理路由绑定
+            // 见：https://learnku.com/docs/laravel/9.x/routing#route-model-binding
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+
+            // 强制用户邮箱认证
             \App\Http\Middleware\EnsureEmailIsVerified::class,
+
+            // 记录用户最后活跃时间
+            \App\Http\Middleware\RecordLastActivedTime::class,
         ],
 
         'api' => [
@@ -48,6 +69,7 @@ class Kernel extends HttpKernel
 
     /**
      * The application's route middleware.
+     * // 中间件别名设置，允许你使用别名调用中间件，例如上面的 api 中间件组调用
      *
      * These middleware may be assigned to groups or used individually.
      *
